@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通讯录管理系统</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="icon" href="data:;base64,=">
+    <script src="./app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+    <div id="app" style="width: 90%; max-width: 800px; min-width: 500px; padding: 20px; background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <header>
+            <h1>通讯录管理系统</h1>
+        </header>
+        <main>
+            <section id="search-contact">
+                <h2>查找联系人</h2>
+                <el-input v-model="searchKeyword" placeholder="输入姓名、电话号码或邮箱进行查找" style="margin-bottom: 20px; width: 60%;"></el-input>
+                <el-button type="primary" @click="searchContacts">查找</el-button>
+                <el-button type="primary" @click="fetchContacts" style="margin-left: 10px;">重置</el-button>
+            </section>
+            <section id="add-contact">
+                <h2>添加新联系人</h2>
+                <el-form :model="contactForm" label-width="120px">
+                    <el-form-item label="姓名" >
+                        <el-input v-model="contactForm.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话号码" >
+                        <el-input v-model="contactForm.phone" maxlength="15"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" >
+                        <el-input v-model="contactForm.email"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="addContact">添加联系人</el-button>
+                    </el-form-item>
+                </el-form>
+            </section>
+            <el-pagination
+            @current-change="handlePageChange"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            layout="prev, pager, next"
+            :total="contacts.length"
+            style="margin-bottom: 20px;">
+            </el-pagination>
+
+            <section id="contact-list">
+                <h2>联系人列表</h2>
+                <el-table :data="paginatedContacts" style="width: 100%" @cell-dblclick="handleEdit">
+                    <el-table-column type="index" label="#" width="50"></el-table-column>
+                    <el-table-column prop="name" label="姓名" width="90">
+                        <template slot-scope="scope">
+                            <el-input v-if="editingRow === scope.row" v-model="scope.row.name" size="small"></el-input>
+                            <span v-else>{{ scope.row.name }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="phone" label="电话号码" width="140">
+                        <template slot-scope="scope">
+                            <el-input v-if="editingRow === scope.row" v-model="scope.row.phone" maxlength="15" size="small"></el-input>
+                            <span v-else>{{ scope.row.phone }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="email" label="邮箱" width="200">
+                        <template slot-scope="scope">
+                            <el-input v-if="editingRow === scope.row" v-model="scope.row.email" size="small"></el-input>
+                            <span v-else>{{ scope.row.email }}</span>
+                        </template>
+                    </el-table-column>
+                        <el-table-column label="操作" width="300">
+                        <template slot-scope="scope">
+                            <div style="display: flex; gap: 5px;">
+                                <el-button v-if="editingRow !== scope.row" type="primary" size="mini" @click="handleEdit(scope.row)" style="border-radius: 15px;">编辑</el-button>
+                                <el-button v-else type="success" size="mini" @click="saveEdit(scope.row)" style="border-radius: 15px;">保存</el-button>
+                                <el-button type="danger" size="mini" @click="deleteContact(scope.$index)" style="border-radius: 15px;">删除</el-button>
+                                <el-button type="warning" size="mini" @click="Blacklist(scope.row)" style="border-radius: 15px;">
+                                    {{ scope.row.is_blacklisted ? '移出黑名单' : '加入黑名单' }}
+                                </el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </section>
+        </main>
+    </div>
+    <el-pagination
+    @current-change="handlePageChange"
+    :current-page="currentPage"
+    :page-size="pageSize"
+    layout="prev, pager, next"
+    :total="contacts.length"
+    style="margin-bottom: 20px;">
+    </el-pagination>
+ 
+</body>
+</html>
